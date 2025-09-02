@@ -2,6 +2,7 @@ package eu.nahoj.fusebox.vfs2.transform;
 
 import eu.nahoj.fusebox.common.api.FileAttributes;
 import eu.nahoj.fusebox.vfs2.api.FuseboxContent;
+import eu.nahoj.fusebox.vfs2.api.FuseboxFS;
 import eu.nahoj.fusebox.vfs2.api.FuseboxFile;
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +22,11 @@ public class MappedContentFile implements DecoratedFile {
 
     // TODO add TTL / use readymade impl
     private final AtomicReference<FuseboxContent> cachedMapped = new AtomicReference<>();
+
+    @Override
+    public FuseboxFS fs() {
+        return delegate().fs();
+    }
 
     @Override
     public FuseboxFile delegate() {

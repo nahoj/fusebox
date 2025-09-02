@@ -3,9 +3,11 @@ package eu.nahoj.fusebox.vfs2.transform;
 import eu.nahoj.fusebox.common.api.DirEntry;
 import eu.nahoj.fusebox.common.api.FileAttributes;
 import eu.nahoj.fusebox.vfs2.api.FuseboxContent;
+import eu.nahoj.fusebox.vfs2.api.FuseboxFS;
 import eu.nahoj.fusebox.vfs2.api.FuseboxFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -13,12 +15,14 @@ import java.util.List;
  */
 public interface DecoratedFile extends FuseboxFile {
 
+    FuseboxFS fs();
+
     /** The underlying file to which calls should be delegated by default. */
     FuseboxFile delegate();
 
     @Override
-    default String name() {
-        return delegate().name();
+    default Path path() {
+        return delegate().path();
     }
 
     @Override

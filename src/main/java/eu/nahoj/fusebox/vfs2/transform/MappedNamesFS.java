@@ -12,8 +12,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
-import static java.util.Objects.requireNonNullElse;
-
 @RequiredArgsConstructor
 public class MappedNamesFS implements FuseboxFS {
 
@@ -28,11 +26,11 @@ public class MappedNamesFS implements FuseboxFS {
 
     // ---------- Path mapping helpers ----------
 
-    private Path mountPathToOrigPath(String mountPath) {
+    private Path mountPathToOrig(Path mountPath) {
         // Rename ALL path prefixes whose mount path matches the selector.
         Path relMountPrefix = EMPTY_PATH;
         Path relOrigPrefix = EMPTY_PATH;
-        for (Path part : Path.of(mountPath)) {
+        for (Path part : mountPath) {
             String mountName = part.toString();
             relMountPrefix = relMountPrefix.resolve(mountName);
             String origName = mountPathSelector.test(relMountPrefix.toString())
@@ -43,10 +41,6 @@ public class MappedNamesFS implements FuseboxFS {
         return relOrigPrefix;
     }
 
-    private String mountPathToOrig(String mountPath) {
-        return mountPathToOrigPath(mountPath).toString();
-    }
-
     @Override
     public Set<Operation> supportedOperations() {
         return delegate.supportedOperations();
@@ -54,14 +48,14 @@ public class MappedNamesFS implements FuseboxFS {
 
     @Override
     public Statvfs getStats(String path) throws IOException {
-        return delegate.getStats(mountPathToOrig(path));
+        return delegate.getStats(mountPathToOrig(Path.of(path)).toString());
     }
 
     @Override
     public FuseboxFile resolveFile(String path) throws IOException {
-        Path origPath = mountPathToOrigPath(path);
+        Path mountPath = Path.of(path);
+        Path origPath = this.mountPathToOrig(mountPath);
         FuseboxFile origFile = delegate.resolveFile(origPath.toString());
-        Path relOrigDirPath = requireNonNullElse(origPath.getParent(), EMPTY_PATH);
-        return new MappedNamesFile(origFile, relOrigDirPath, origPathSelector, origNameToMount);
+        return new MappedNamesFile(this, mountPath, origFile, origPathSelector, origNameToMount);
     }
 }
