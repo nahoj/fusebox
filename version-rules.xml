@@ -1,0 +1,10 @@
+<ruleset>
+  <rules>
+    <rule groupId="*" artifactId="*">
+      <ignoreVersions>
+        <ignoreVersion type="regex">(?i).*-(alpha|beta|rc|CR|M[0-9]+|milestone|preview|prerelease|ea|dev).*</ignoreVersion>
+        <ignoreVersion type="regex">(?i).*-SNAPSHOT.*</ignoreVersion>
+      </ignoreVersions>
+    </rule>
+  </rules>
+</ruleset>

@@ -1,0 +1,96 @@
+version: '3'
+
+# Project tasks to run jfuse examples and helpers.
+# Usage examples:
+#   task hello                # mount HelloFuse into ./mnt
+#   task hello MOUNT=/path    # choose mountpoint
+#   task mirror               # mirror ./mirror to ./mnt
+#   task mirror SRC=/path/to/src MOUNT=/path/to/mount
+#   task unmount              # unmount ./mnt (or pass MOUNT=...)
+#   task deps                 # build runtime classpath into target/cp.txt
+#   task build                # mvn package (skip tests)
+
+vars:
+  # Global default mountpoint. Can be overridden via: task hello MOUNT=/path
+  MOUNT: '{{default .MOUNT "/home/jg/temp/mnt"}}'
+  # Source directory to mirror. Override via: task mirror SRC=/path
+  SRC: '{{default .SRC "./mirror"}}'
+
+tasks:
+  # Build classpath used by runtime
+  deps:
+    cmds:
+      - mvnd -q -DincludeScope=runtime -DskipTests dependency:build-classpath -Dmdep.outputFile=target/cp.txt
+    sources:
+      - pom.xml
+    generates:
+      - target/cp.txt
+
+  # Compile project jar
+  build:
+    cmds:
+      - mvnd -q -DskipTests package
+    sources:
+      - pom.xml
+      - src/main/java/**/*.java
+      - src/main/resources/**
+    generates:
+      - target/fusebox-1.0-SNAPSHOT.jar
+
+  # Ensure mountpoint exists and is cleaned up if stale
+  prep-mount:
+    cmds:
+      - |
+        # Try to unmount if a stale FUSE mount exists
+        fusermount3 -u "{{.MOUNT}}" >/dev/null 2>&1 || true
+
+  # Run HelloFuse and mount at MOUNT
+  hello:
+    desc: "Run HelloFuse and mount the FS (Ctrl+C to unmount)"
+    run: always
+    cmds:
+      - |
+        direnv exec . java \
+          --enable-native-access=ALL-UNNAMED \
+          -Djava.library.path="/usr/lib/x86_64-linux-gnu" \
+          -cp target/fusebox-1.0-SNAPSHOT.jar:$(cat target/cp.txt) \
+          org.cryptomator.jfuse.examples.HelloFuse "{{.MOUNT}}"
+
+  # Run PosixMirrorFileSystem to mirror SRC into MOUNT
+  mirror:
+    desc: "Run PosixMirrorFileSystem to mirror SRC into the mounted FS (Ctrl+C to unmount)"
+    run: always
+    deps: [build, deps, prep-mount]
+    cmds:
+      - |
+        direnv exec . java \
+          --enable-native-access=ALL-UNNAMED \
+          -Djava.library.path="/usr/lib/x86_64-linux-gnu" \
+          -Dfuse.lib.path="${FUSE_LIB_PATH}" \
+          -cp target/fusebox-1.0-SNAPSHOT.jar:$(cat target/cp.txt) \
+          org.cryptomator.jfuse.examples.PosixMirrorFileSystem "{{.SRC}}" "{{.MOUNT}}"
+
+  test-posix:
+    cmds:
+      - mvnd -Dfusebox.it.fs=posix verify
+
+  # Unmount helper
+  unmount:
+    desc: "Unmount the FUSE filesystem from MOUNT (default: ./mnt)"
+    cmds:
+      - fusermount3 -u "{{.MOUNT}}" || true
+
+  update-:
+    cmds:
+      - mvnd versions:display-dependency-updates
+
+  update+:
+    cmds:
+      - mvnd versions:use-latest-releases
+
+  # Misc
+  # pipx install gitstats
+  gitstats:
+    cmds:
+      - gitstats . target/gitstats
+      - xdg-open target/gitstats/index.html
