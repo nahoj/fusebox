@@ -8,11 +8,7 @@ import eu.nahoj.fusebox.vfs2.api.FuseboxFile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import org.apache.commons.vfs2.FileNotFoundException;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileTypeHasNoContentException;
-import org.apache.commons.vfs2.RandomAccessContent;
+import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.util.RandomAccessMode;
 import org.cryptomator.jfuse.api.FuseOperations.Operation;
 import org.slf4j.Logger;
@@ -28,13 +24,7 @@ import java.util.Set;
 import static eu.nahoj.fusebox.common.api.FileType.DIRECTORY;
 import static eu.nahoj.fusebox.common.api.FileType.REGULAR_FILE;
 import static java.util.Objects.requireNonNull;
-import static org.cryptomator.jfuse.api.FuseOperations.Operation.GET_ATTR;
-import static org.cryptomator.jfuse.api.FuseOperations.Operation.OPEN;
-import static org.cryptomator.jfuse.api.FuseOperations.Operation.OPEN_DIR;
-import static org.cryptomator.jfuse.api.FuseOperations.Operation.READ;
-import static org.cryptomator.jfuse.api.FuseOperations.Operation.READ_DIR;
-import static org.cryptomator.jfuse.api.FuseOperations.Operation.RELEASE;
-import static org.cryptomator.jfuse.api.FuseOperations.Operation.RELEASE_DIR;
+import static org.cryptomator.jfuse.api.FuseOperations.Operation.*;
 
 /// Not named `LocalFile` to avoid confusion with vfs2's `LocalFile`.
 @Accessors(fluent = true)
@@ -60,7 +50,7 @@ public class Vfs2File implements FuseboxFile {
 //    }
 
     @Override
-    public FileAttributes getAttributes() throws FileSystemException {
+    public FileAttributes getAttributes() throws IOException {
         LOG.trace("getAttributes({})", fo.getName());
         FileType type = switch (fo.getType()) {
             case FILE -> REGULAR_FILE;

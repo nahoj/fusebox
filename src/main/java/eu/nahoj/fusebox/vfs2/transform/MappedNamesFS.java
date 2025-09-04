@@ -3,6 +3,7 @@ package eu.nahoj.fusebox.vfs2.transform;
 import eu.nahoj.fusebox.vfs2.api.FuseboxFS;
 import eu.nahoj.fusebox.vfs2.api.FuseboxFile;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.cryptomator.jfuse.api.FuseOperations.Operation;
 import org.cryptomator.jfuse.api.Statvfs;
 
@@ -15,7 +16,7 @@ import java.util.function.UnaryOperator;
 @RequiredArgsConstructor
 public class MappedNamesFS implements FuseboxFS {
 
-    private static final Path EMPTY_PATH = Path.of("");
+    public static final Path EMPTY_PATH = Path.of("");
 
     private final FuseboxFS delegate;
     private final Predicate<String> origPathSelector;
@@ -26,19 +27,36 @@ public class MappedNamesFS implements FuseboxFS {
 
     // ---------- Path mapping helpers ----------
 
-    private Path mountPathToOrig(Path mountPath) {
-        // Rename ALL path prefixes whose mount path matches the selector.
-        Path relMountPrefix = EMPTY_PATH;
-        Path relOrigPrefix = EMPTY_PATH;
-        for (Path part : mountPath) {
-            String mountName = part.toString();
-            relMountPrefix = relMountPrefix.resolve(mountName);
-            String origName = mountPathSelector.test(relMountPrefix.toString())
-                    ? mountNameToOrig.apply(mountName)
-                    : mountName;
-            relOrigPrefix = relOrigPrefix.resolve(origName);
+    private static Pair<Path, Path> resolveBeforeAndAfter(
+            Pair<Path, Path> parentBeforeAndAfter,
+            String beforeName,
+            Predicate<String> beforePathSelector,
+            UnaryOperator<String> beforeNameToAfter
+    ) {
+        Path newBeforePath = parentBeforeAndAfter.getLeft().resolve(beforeName);
+        String afterName = beforePathSelector.test(newBeforePath.toString())
+                ? beforeNameToAfter.apply(beforeName)
+                : beforeName;
+        Path newAfterPath = parentBeforeAndAfter.getRight().resolve(afterName);
+        return Pair.of(newBeforePath, newAfterPath);
+    }
+
+    static Path translatePath(
+            Path beforePath,
+            Predicate<String> beforePathSelector,
+            UnaryOperator<String> beforeNameToAfter
+    ) {
+        // Rename ALL path prefixes whose before-path matches the selector.
+        Pair<Path, Path> beforeAndAfterPrefixes = Pair.of(EMPTY_PATH, EMPTY_PATH);
+        for (Path part : beforePath) {
+            beforeAndAfterPrefixes = resolveBeforeAndAfter(beforeAndAfterPrefixes, part.toString(),
+                    beforePathSelector, beforeNameToAfter);
         }
-        return relOrigPrefix;
+        return beforeAndAfterPrefixes.getRight();
+    }
+
+    private Path mountPathToOrig(Path mountPath) {
+        return translatePath(mountPath, mountPathSelector, mountNameToOrig);
     }
 
     @Override

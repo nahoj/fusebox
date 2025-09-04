@@ -9,19 +9,13 @@ import eu.nahoj.fusebox.vfs2.api.FuseboxFile;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.function.Consumers;
-import org.cryptomator.jfuse.api.DirFiller;
-import org.cryptomator.jfuse.api.Errno;
-import org.cryptomator.jfuse.api.FileInfo;
-import org.cryptomator.jfuse.api.FuseConfig;
-import org.cryptomator.jfuse.api.FuseConnInfo;
-import org.cryptomator.jfuse.api.FuseOperations;
-import org.cryptomator.jfuse.api.Stat;
-import org.cryptomator.jfuse.api.Statvfs;
+import org.cryptomator.jfuse.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -100,7 +94,19 @@ public class FuseboxFSOperations implements FuseOperations {
     }
 
     // Links
-    public int readlink(String path, ByteBuffer buf, long len) { return -errno.enosys(); }
+    public int readlink(String path, ByteBuffer buf, long len) {
+        return catchErrno(errno, () -> {
+            FuseboxFile f = delegate.resolveFile(normalizePath(path));
+            String target = f.getTargetPath();
+            byte[] bytes = target.getBytes(StandardCharsets.UTF_8);
+            int cap = (int) Math.min(len, buf.remaining());
+            int n = cap > 0 ? Math.min(bytes.length, cap - 1) : 0; // reserve NUL if possible
+            if (n > 0) buf.put(bytes, 0, n);
+            if (cap - n > 0) buf.put((byte) 0);
+            return 0;
+        });
+    }
+
     public int symlink(String target, String linkname) { return -errno.erofs(); }
 
     // Directories

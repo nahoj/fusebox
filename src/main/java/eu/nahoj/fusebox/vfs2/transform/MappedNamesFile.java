@@ -13,22 +13,35 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toSet;
+import static eu.nahoj.fusebox.vfs2.util.MiscUtils.parentPath;
+import static java.util.stream.Collectors.*;
 
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class MappedNamesFile implements DecoratedFile {
 
-    @Getter
-    private final MappedNamesFS fs;
-    @Getter
-    private final Path path;
-    @Getter
-    private final FuseboxFile delegate;
+    @Getter private final MappedNamesFS fs;
+    @Getter private final Path path;
+    @Getter private final FuseboxFile delegate;
     private final Predicate<String> origPathSelector;
     private final UnaryOperator<String> origNameToMount;
+
+    // Links
+
+    @Override
+    public String getTargetPath() throws IOException {
+        Path rawTargetPath = Path.of(delegate.getTargetPath());
+        if (rawTargetPath.isAbsolute()) {
+            return rawTargetPath.toString();
+        } else {
+            Path targetPathFromOrigRoot = parentPath(delegate.path()).resolve(rawTargetPath).normalize();
+            Path targetPathFromMountRoot =
+                    MappedNamesFS.translatePath(targetPathFromOrigRoot, origPathSelector, origNameToMount);
+            return parentPath(path()).relativize(targetPathFromMountRoot).toString();
+        }
+    }
+
+    // Directories
 
     @Override
     public List<DirEntry> getEntries() throws IOException {

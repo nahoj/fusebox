@@ -29,10 +29,10 @@ public interface FuseboxFile {
     }
 
     // Links
-//    default String getTargetPath() throws IOException {
-//        throw new NotImplementedException();
-//    }
-//
+    default String getTargetPath() throws IOException {
+        throw new NotImplementedException();
+    }
+
 //    default FuseboxFile getTargetFile() throws IOException {
 //        throw new NotImplementedException();
 //    }

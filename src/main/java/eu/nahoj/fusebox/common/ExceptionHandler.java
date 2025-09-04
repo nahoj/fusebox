@@ -26,7 +26,7 @@ public final class ExceptionHandler {
     }
 
     private static int translateException(Errno errno, Exception exception) {
-        LOG.debug("Matching exception {}: {}", exception.getClass().getName(), exception.getMessage());
+        LOG.trace("Matching exception {}: {}", exception.getClass().getName(), exception.getMessage());
         return switch (exception) {
             // Wrapped exceptions
             case java.io.UncheckedIOException ex -> translateException(errno, ex.getCause());

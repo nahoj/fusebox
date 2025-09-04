@@ -31,6 +31,11 @@ public interface DecoratedFile extends FuseboxFile {
     }
 
     @Override
+    default String getTargetPath() throws IOException {
+        return delegate().getTargetPath();
+    }
+
+    @Override
     default boolean existsAndIsDirectory() throws IOException {
         return delegate().existsAndIsDirectory();
     }
