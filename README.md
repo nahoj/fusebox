@@ -1,8 +1,15 @@
 # fusebox
 
-This is a Java library that aims to make it easy to create and transform FUSE filesystems in a functional, composable style. It is built on [jfuse](https://github.com/cryptomator/jfuse) and [VFS](https://commons.apache.org/proper/commons-vfs/).
+This is a Java library that aims to make it easy to transform "views" of file hierarchies in a functional, composable way, and mount them as FUSE filesystems. It is built on [jfuse](https://github.com/cryptomator/jfuse) and [VFS](https://commons.apache.org/proper/commons-vfs/).
 
-For example, here is the main part of a JBang script that mounts a view of an existing directory where all Markdown files are transformed to HTML:
+Transformations can be, for instance:
+- filtering files
+- changing file names or contents
+- making some files or the whole FS read-only
+
+Is it actually useful? Who knows?
+
+As an example, here is the main part of a JBang script that mounts a view of an existing directory where all Markdown files are transformed to HTML:
 
 ```java
     FuseboxFS fs = LocalFS.at(args[0])
@@ -19,7 +26,7 @@ For example, here is the main part of a JBang script that mounts a view of an ex
     Fusebox.mount("markdown_to_html", fs, args[1]);
 ```
 
-The full script is 50 lines long: [scripts/vfs2/markdown_to_html.java](scripts/vfs2/markdown_to_html.java).
+Full script: [scripts/vfs2/markdown_to_html.java](scripts/vfs2/markdown_to_html.java).
 
 > ⚠️ This is very experimental and barely tested. Don’t run code from this repo unless you’re okay with the risk of system crash or data loss. ⚠️️️
 
