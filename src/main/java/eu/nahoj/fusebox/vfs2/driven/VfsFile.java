@@ -82,12 +82,19 @@ public class VfsFile implements FuseboxFile {
 
     @Override
     public void setPermissions(Set<PosixFilePermission> permissions) throws IOException {
-        fo.setReadable(permissions.contains(OTHERS_READ), false);
-        fo.setReadable(permissions.contains(OWNER_READ), true);
-        fo.setWritable(permissions.contains(OTHERS_WRITE), false);
-        fo.setWritable(permissions.contains(OWNER_WRITE), true);
-        fo.setExecutable(permissions.contains(OTHERS_EXECUTE), false);
-        fo.setExecutable(permissions.contains(OWNER_EXECUTE), true);
+        // Best effort: group permissions ignored
+        if (!fo.setReadable(permissions.contains(OTHERS_READ), false))
+            throw new IOException("setReadable failed");
+        if (!fo.setReadable(permissions.contains(OWNER_READ), true))
+            throw new IOException("setReadable failed");
+        if (!fo.setWritable(permissions.contains(OTHERS_WRITE), false))
+            throw new IOException("setWritable failed");
+        if (!fo.setWritable(permissions.contains(OWNER_WRITE), true))
+            throw new IOException("setWritable failed");
+        if (!fo.setExecutable(permissions.contains(OTHERS_EXECUTE), false))
+            throw new IOException("setExecutable failed");
+        if (!fo.setExecutable(permissions.contains(OWNER_EXECUTE), true))
+            throw new IOException("setExecutable failed");
     }
 
     // Directories
@@ -129,6 +136,6 @@ public class VfsFile implements FuseboxFile {
 
     @Override
     public void delete() throws IOException {
-        fo.delete();
+        if (!fo.delete()) throw new IOException("delete failed");
     }
 }
