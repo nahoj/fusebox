@@ -25,9 +25,9 @@ import static eu.nahoj.fusebox.common.ExceptionHandler.catchErrno;
 
 @Accessors(fluent = true)
 @RequiredArgsConstructor
-public class FuseboxFSOperations implements FuseOperations {
+public class FuseboxOperations implements FuseOperations {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FuseboxFSOperations.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FuseboxOperations.class);
 
     private final FuseboxFS delegate;
     private final Errno errno;
@@ -60,7 +60,7 @@ public class FuseboxFSOperations implements FuseOperations {
     // Lifecycle
     public void init(FuseConnInfo conn, @Nullable FuseConfig cfg) {
         LOG.trace("init(conn={}, cfg={})", conn, cfg);
-        LOG.debug("Initializing VFS2 FuseboxFSOperations. Supported operations: {}", supportedOperations());
+        LOG.debug("Initializing VFS2 FuseboxOperations. Supported operations: {}", supportedOperations());
     }
 
     public int statfs(String path, Statvfs out) {

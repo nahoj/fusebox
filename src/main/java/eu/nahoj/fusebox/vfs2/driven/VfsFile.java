@@ -28,18 +28,17 @@ import static java.nio.file.attribute.PosixFilePermission.*;
 import static java.util.Objects.requireNonNull;
 import static org.cryptomator.jfuse.api.FuseOperations.Operation.*;
 
-/// Not named `LocalFile` to avoid confusion with vfs2's `LocalFile`.
 @Accessors(fluent = true)
 @AllArgsConstructor
-public class Vfs2File implements FuseboxFile {
+public class VfsFile implements FuseboxFile {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Vfs2File.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VfsFile.class);
 
     public static final Set<Operation> IMPLEMENTED_OPERATIONS =
             EnumSet.of(GET_ATTR, CHMOD, MKDIR, OPEN_DIR, READ_DIR, RELEASE_DIR, RMDIR, OPEN, READ, RELEASE, UNLINK);
 
     @Getter
-    private final Vfs2FS fs;
+    private final VfsFS fs;
     @Getter
     private final Path path;
     protected final FileObject fo;

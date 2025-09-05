@@ -36,13 +36,13 @@ Full script: [scripts/vfs2/markdown_to_html.java](scripts/vfs2/markdown_to_html.
 
 The above example uses a design with transformations at 3 levels (file system - file - file content) inspired by Apache's VFS lib, but with simpler interfaces. The implementation also uses VFS to access the local file system.
 
-The current implementation covers only a few operations (read directories and files) and transformations, but it could be extended to cover more ground.
+The current implementation covers only some operations (read and delete files, dir. operations, readlink, chmod) and transformations, but it could be extended to cover more ground.
 
 Since it has a VFS adapter, it could also probably be used to mount any existing VFS filesystem implementation.
 
 This part of the lib can be found in `eu.nahoj.fusebox.vfs2`.
 
-### The earlier (nio-backed) design with write operations implemented
+### The earlier (nio-backed) design, with most operations implemented
 
 My first design had transformations only at the FS level. It is less elegant, but I left it for comparison as I implemented a majority of jfuse operations in it.
 

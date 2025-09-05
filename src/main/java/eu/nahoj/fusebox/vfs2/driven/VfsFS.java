@@ -15,16 +15,16 @@ import java.util.Set;
 import static java.util.stream.Collectors.toCollection;
 
 @RequiredArgsConstructor
-public class Vfs2FS implements FuseboxFS {
+public class VfsFS implements FuseboxFS {
 
     protected final FileObject root;
 
     public FuseboxFile resolveFile(String path) throws IOException {
-        return new Vfs2File(this, Path.of(path), root.resolveFile(path));
+        return new VfsFile(this, Path.of(path), root.resolveFile(path));
     }
 
     public Set<Operation> supportedOperations() {
-        return Vfs2File.IMPLEMENTED_OPERATIONS.stream()
+        return VfsFile.IMPLEMENTED_OPERATIONS.stream()
                 .filter(this::backingFsSupportsOperation)
                 .collect(toCollection(() -> EnumSet.noneOf(Operation.class)));
     }

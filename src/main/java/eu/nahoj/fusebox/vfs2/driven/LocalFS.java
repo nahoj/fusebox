@@ -18,7 +18,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toCollection;
 import static org.cryptomator.jfuse.api.FuseOperations.Operation.STATFS;
 
-public class LocalFS extends Vfs2FS {
+public class LocalFS extends VfsFS {
 
     public LocalFS(FileObject root) {
         super(root);

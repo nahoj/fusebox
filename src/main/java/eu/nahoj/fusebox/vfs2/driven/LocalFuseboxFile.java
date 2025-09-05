@@ -24,10 +24,10 @@ import static org.cryptomator.jfuse.api.FuseOperations.Operation.READLINK;
 
 /// Not named `LocalFile` to avoid confusion with vfs2's `LocalFile`.
 @Accessors(fluent = true)
-public class LocalFuseboxFile extends Vfs2File {
+public class LocalFuseboxFile extends VfsFile {
 
     public static final Set<Operation> IMPLEMENTED_OPERATIONS =
-            SetUtils.union(Vfs2File.IMPLEMENTED_OPERATIONS, EnumSet.of(READLINK));
+            SetUtils.union(VfsFile.IMPLEMENTED_OPERATIONS, EnumSet.of(READLINK));
 
     @Getter
     private final LocalFS fs;
