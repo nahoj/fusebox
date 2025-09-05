@@ -1,4 +1,4 @@
-///usr/bin/env LC_ALL=C JBANG_RUNTIME_OPTIONS="-Djava.library.path=$JAVA_LIBRARY_PATH --enable-native-access=ALL-UNNAMED" jbang "$0" "$@" ; exit $?
+///usr/bin/env LC_ALL=C JBANG_RUNTIME_OPTIONS="--enable-native-access=ALL-UNNAMED" jbang "$0" "$@" ; exit $?
 // LC_ALL=C is not mandatory but improves error handling
 //JAVA 24
 //DEPS eu.nahoj:fusebox:1.0-SNAPSHOT

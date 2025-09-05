@@ -2,6 +2,7 @@ package eu.nahoj.fusebox.vfs2.driven;
 
 import eu.nahoj.fusebox.common.api.StatvfsData;
 import eu.nahoj.fusebox.vfs2.api.FuseboxFile;
+import one.util.streamex.StreamEx;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.VFS;
 import org.cryptomator.jfuse.api.FuseOperations.Operation;
@@ -32,13 +33,10 @@ public class LocalFS extends Vfs2FS {
     }
 
     public Set<Operation> supportedOperations() {
-        Set<Operation> operations = LocalFuseboxFile.IMPLEMENTED_OPERATIONS.stream()
+        return StreamEx.of(LocalFuseboxFile.IMPLEMENTED_OPERATIONS)
                 .filter(this::backingFsSupportsOperation)
+                .append(STATFS)
                 .collect(toCollection(() -> EnumSet.noneOf(Operation.class)));
-        if (!"file".equals(root.getName().getScheme())) {
-            operations.remove(STATFS);
-        }
-        return operations;
     }
 
     /// Return stats for the given path's FileStore

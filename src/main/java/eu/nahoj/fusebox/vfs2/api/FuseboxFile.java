@@ -7,7 +7,9 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import static java.util.Objects.requireNonNull;
@@ -28,7 +30,12 @@ public interface FuseboxFile {
         throw new NotImplementedException();
     }
 
+    default void setPermissions(Set<PosixFilePermission> permissions) throws IOException {
+        throw new NotImplementedException();
+    }
+
     // Links
+
     default String getTargetPath() throws IOException {
         throw new NotImplementedException();
     }
@@ -36,6 +43,12 @@ public interface FuseboxFile {
 //    default FuseboxFile getTargetFile() throws IOException {
 //        throw new NotImplementedException();
 //    }
+
+    // Directories
+
+    default void createDirectory(Set<PosixFilePermission> permissions) throws IOException {
+        throw new NotImplementedException();
+    }
 
     /** Backs the `opendir` operation. */
     default boolean existsAndIsDirectory() throws IOException {
@@ -46,6 +59,8 @@ public interface FuseboxFile {
         throw new NotImplementedException();
     }
 
+    // Files
+
     /** Open a readable handle if this is a regular file. */
     default FuseboxContent openReadable() throws IOException {
         throw new NotImplementedException();
@@ -54,5 +69,9 @@ public interface FuseboxFile {
     /** Returns a view of this file with contents mapped by the provided mapper. */
     default FuseboxFile mapContent(UnaryOperator<FuseboxContent> mapper) {
         return new MappedContentFile(this, mapper);
+    }
+
+    default void delete() throws IOException {
+        throw new NotImplementedException();
     }
 }

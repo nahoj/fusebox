@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +64,11 @@ public class LocalFuseboxFile extends Vfs2File {
                 .lastModifiedTime(((FileTime) attrs.get("lastModifiedTime")).toInstant())
                 .lastChangeTime(((FileTime) attrs.get("ctime")).toInstant())
                 .build();
+    }
+
+    @Override
+    public void setPermissions(Set<PosixFilePermission> permissions) throws IOException {
+        Files.setPosixFilePermissions(getAbsolutePath(), permissions);
     }
 
     // Links

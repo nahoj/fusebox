@@ -93,6 +93,13 @@ public class FuseboxFSOperations implements FuseOperations {
         });
     }
 
+    public int chmod(String path, int mode, @Nullable FileInfo fi) {
+        return catchErrno(errno, () -> {
+            delegate.resolveFile(normalizePath(path)).setPermissions(FileModes.toPermissions(mode));
+            return 0;
+        });
+    }
+
     // Links
     public int readlink(String path, ByteBuffer buf, long len) {
         return catchErrno(errno, () -> {
@@ -110,6 +117,13 @@ public class FuseboxFSOperations implements FuseOperations {
     public int symlink(String target, String linkname) { return -errno.erofs(); }
 
     // Directories
+    public int mkdir(String path, int mode) {
+        return catchErrno(errno, () -> {
+            delegate.resolveFile(normalizePath(path)).createDirectory(FileModes.toPermissions(mode));
+            return 0;
+        });
+    }
+
     public int opendir(String path, FileInfo fi) {
         LOG.trace("opendir(path={})", path);
         return catchErrno(errno, () -> {
@@ -141,7 +155,12 @@ public class FuseboxFSOperations implements FuseOperations {
         return 0; // no-op
     }
 
-    public int rmdir(String path) { return -errno.erofs(); }
+    public int rmdir(String path) {
+        return catchErrno(errno, () -> {
+            delegate.resolveFile(normalizePath(path)).delete();
+            return 0;
+        });
+    }
 
     // Files
     public int open(String path, FileInfo fi) {
@@ -195,7 +214,12 @@ public class FuseboxFSOperations implements FuseOperations {
         });
     }
 
-    public int unlink(String path) { return -errno.erofs(); }
+    public int unlink(String path) {
+        return catchErrno(errno, () -> {
+            delegate.resolveFile(normalizePath(path)).delete();
+            return 0;
+        });
+    }
 
     public int rename(String oldpath, String newpath, int flags) { return -errno.erofs(); }
 

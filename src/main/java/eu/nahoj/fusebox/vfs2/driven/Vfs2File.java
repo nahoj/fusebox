@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Set;
 
 import static eu.nahoj.fusebox.common.api.FileType.DIRECTORY;
 import static eu.nahoj.fusebox.common.api.FileType.REGULAR_FILE;
+import static java.nio.file.attribute.PosixFilePermission.*;
 import static java.util.Objects.requireNonNull;
 import static org.cryptomator.jfuse.api.FuseOperations.Operation.*;
 
@@ -34,7 +36,7 @@ public class Vfs2File implements FuseboxFile {
     private static final Logger LOG = LoggerFactory.getLogger(Vfs2File.class);
 
     public static final Set<Operation> IMPLEMENTED_OPERATIONS =
-            EnumSet.of(GET_ATTR, OPEN_DIR, READ_DIR, RELEASE_DIR, OPEN, READ, RELEASE);
+            EnumSet.of(GET_ATTR, CHMOD, MKDIR, OPEN_DIR, READ_DIR, RELEASE_DIR, RMDIR, OPEN, READ, RELEASE, UNLINK);
 
     @Getter
     private final Vfs2FS fs;
@@ -80,6 +82,24 @@ public class Vfs2File implements FuseboxFile {
     }
 
     @Override
+    public void setPermissions(Set<PosixFilePermission> permissions) throws IOException {
+        fo.setReadable(permissions.contains(OTHERS_READ), false);
+        fo.setReadable(permissions.contains(OWNER_READ), true);
+        fo.setWritable(permissions.contains(OTHERS_WRITE), false);
+        fo.setWritable(permissions.contains(OWNER_WRITE), true);
+        fo.setExecutable(permissions.contains(OTHERS_EXECUTE), false);
+        fo.setExecutable(permissions.contains(OWNER_EXECUTE), true);
+    }
+
+    // Directories
+
+    @Override
+    public void createDirectory(Set<PosixFilePermission> permissions) throws IOException {
+        fo.createFolder();
+        setPermissions(permissions);
+    }
+
+    @Override
     public boolean existsAndIsDirectory() throws IOException {
         return fo.exists() && fo.isFolder();
     }
@@ -94,6 +114,8 @@ public class Vfs2File implements FuseboxFile {
         return list;
     }
 
+    // Files
+
     @Override
     public FuseboxContent openReadable() throws FileSystemException {
         LOG.trace("openReadable({})", fo.getName());
@@ -104,5 +126,10 @@ public class Vfs2File implements FuseboxFile {
         FuseboxContent readable = new RacContent(rac);
         LOG.trace("openReadable({}) -> success", fo.getName());
         return readable;
+    }
+
+    @Override
+    public void delete() throws IOException {
+        fo.delete();
     }
 }
