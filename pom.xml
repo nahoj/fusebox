@@ -16,6 +16,8 @@
         <bytebuddy.version>1.17.7</bytebuddy.version>
         <lombok.version>1.18.38</lombok.version>
         <spring.version>6.2.10</spring.version>
+
+        <skipITs>false</skipITs>
     </properties>
 
     <dependencies>
@@ -33,25 +35,21 @@
             <version>3.0.0</version>
         </dependency>
 -->
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.5.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.28.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.18.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-vfs2</artifactId>
@@ -64,25 +62,21 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.cryptomator</groupId>
             <artifactId>jfuse</artifactId>
             <version>0.7.3</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.17</version>
         </dependency>
-
         <dependency>
             <!-- Present as part of spring-core during build,
             must be included for Apache vfs2 runtime -->
@@ -92,7 +86,6 @@
         </dependency>
 
         <!-- Build dependencies -->
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -108,28 +101,24 @@
             <version>1.4.1</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
             <version>${bytebuddy.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.27.4</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.13.4</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -195,6 +184,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
+                    <skipTests>${skipITs}</skipTests>
                     <includes>
                         <include>**/*IT.java</include>
                     </includes>
@@ -239,4 +229,14 @@ done
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>s</id>
+            <properties>
+                <!-- Skip all tests, including compilation -->
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>

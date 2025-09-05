@@ -90,7 +90,7 @@ As a general rule:
 
 ```bash
 direnv allow
-direnv exec . mvn -DskipTests install
+direnv exec . mvn -Ps install
 ```
 
 ## Run
